@@ -1,0 +1,3 @@
+cargo objcopy --release -- -O binary app.bin
+
+python bin2hex/freedom-bin2hex.py -w16 app.bin >code.mem16
