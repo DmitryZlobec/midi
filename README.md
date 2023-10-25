@@ -87,7 +87,5 @@ To load in FPGA
 __load.bat__
 
 ## Example
-
-https://studio.youtube.com/video/3Girmdu2oNI/edit
-
+(https://youtube.com/shorts/3Girmdu2oNI)https://youtube.com/shorts/3Girmdu2oNI
 
