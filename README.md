@@ -1,7 +1,7 @@
 # MIDI Sender with 16bit YRV-Plus RISC-V CPU for DE0-CV
 
 ## Scripts description
-In  Plus/boards/omdazz/ run
+In  Plus/boards/de0-cv/ run
 ```
   01_clean.bash                   Clean project
   05_synthesize_for_fpga.bash     Synthesize project and load ro FPGA
