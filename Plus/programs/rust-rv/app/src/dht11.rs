@@ -1,6 +1,5 @@
+// Different ways to read ports
 pub fn temperature()-> u16 {    
-       // let  buffer: &mut u16 = unsafe {  &mut *(0xFFFF0010 as *const u16) };
-       // *buffer
        let mut out_half;
        unsafe { 
               core::arch::asm!(
@@ -13,6 +12,8 @@ pub fn temperature()-> u16 {
 
 
 pub fn himmidity()-> u16 {    
-       let  buffer: &mut u16 = unsafe { &mut *(0xFFFF0012 as *mut u16) };
-       *buffer
+       let addr = 0xFFFF0012;
+       unsafe {
+           (addr as *mut u16).read_volatile()
+       }
 }
