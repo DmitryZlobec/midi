@@ -1,7 +1,7 @@
-# 16bit YRV-Plus RISC-V CPU for OMDAZZ board with  PS/2 port and Serial port
+# MIDI Sender with 16bit YRV-Plus RISC-V CPU for DE0-CV
 
 ## Scripts description
-In  Plus/boards/omdazz/ run
+In  Plus/boards/de0-cv/ run
 ```
   01_clean.bash                   Clean project
   05_synthesize_for_fpga.bash     Synthesize project and load ro FPGA
@@ -14,8 +14,7 @@ You need USB-to-Serial adapter for loading binary to the FPGA Board.
 
 ## Programs Description
 ```
-  01_hello_text        Serial port example
-  01_tetris            ASCII based tetris game
+  rust-rv        Rust RISC-V YRV Framework
 ```
 
 After build you copy  _code_demo.mem16_ to the _Plus/design_ directory
@@ -69,20 +68,17 @@ to build run in __app__:
 
 __cargo objcopy --release -- -O binary app.bin__
 
-
-
-
-
  __rustup toolchain install nightly__
+
  __rustup override set nightly__
 
 __cargo build -Z build-std=core --target riscv32ic-unknown-none-elf.json --release__
 
 __python bin2hex/freedom-bin2hex.py -w16 app.bin >code.mem16__
 
-rustc -Z unstable-options --target=riscv32imac-unknown-none-elf --print target-spec-json
+__rustc -Z unstable-options --target=riscv32imac-unknown-none-elf --print target-spec-json__
 
-riscv-none-elf-objcopy.exe  -O binary ../target/riscv32ic-unknown-none-elf/release/app  app.bin
+__riscv-none-elf-objcopy.exe  -O binary ../target/riscv32ic-unknown-none-elf/release/app  app.bin__
 
 To load in FPGA
 
