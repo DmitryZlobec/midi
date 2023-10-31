@@ -17,6 +17,8 @@ You need USB-to-Serial adapter for loading binary to the FPGA Board.
   rust-rv        Rust RISC-V YRV Framework
 ```
 
+It based on https://github.com/rust-embedded/riscv-rt 
+
 After build you copy  _code_demo.mem16_ to the _Plus/design_ directory
 
 You can run ./07_upload_soft_to_fpga.bash directly form source folder
@@ -84,4 +86,6 @@ To load in FPGA
 
 __load.bat__
 
+## Example
+https://youtube.com/shorts/3Girmdu2oNI
 
