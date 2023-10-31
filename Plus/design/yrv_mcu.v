@@ -391,13 +391,53 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
   // /*****************************************************************************************/
   // /* serial port                                                                           */
   // /*****************************************************************************************/
-   uart SERIAL (.clk(real_clk), .reset(~resetb), .rd_uart(rd_rdata),
-       .wr_uart(ld_wdata), .rx(ser_rxd), .w_data(mem_wdata[7:0]),
-       .tx_full(bufr_full), .rx_empty(bufr_empty),
-       .r_data(rx_rdata), .tx(ser_txd));
+  //  uart SERIAL (.clk(real_clk), .reset(~resetb), .rd_uart(rd_rdata),
+  //      .wr_uart(ld_wdata), .rx(ser_rxd), .w_data(mem_wdata[7:0]),
+  //      .tx_full(bufr_full), .rx_empty(bufr_empty),
+  //      .r_data(rx_rdata), .tx(ser_txd));
+
+// Clock frequency in hertz.
+//parameter CLK_HZ = 50000000;
+parameter CLK_HZ = 12500000;
+
+parameter BIT_RATE =   31250;
+parameter PAYLOAD_BITS = 8;
+
+
+//
+// UART RX
+uart_rx #(
+.BIT_RATE(BIT_RATE),
+.PAYLOAD_BITS(PAYLOAD_BITS),
+.CLK_HZ  (CLK_HZ  )
+) i_uart_rx(
+.clk          (clk     ), // Top level system clock input.
+.resetn       (resetb        ), // Asynchronous active low reset.
+.uart_rxd     (ser_rxd     ), // UART Recieve pin.
+.uart_rx_en   (1'b1         ), // Recieve enable
+.uart_rx_break(bufr_ovr), // Did we get a BREAK message?
+.uart_rx_valid(bufr_empty), // Valid data recieved and available.
+.uart_rx_data (rx_rdata )  // The recieved data.
+);
+
+//
+// UART Transmitter module.
+//
+uart_tx #(
+.BIT_RATE(BIT_RATE),
+.PAYLOAD_BITS(PAYLOAD_BITS),
+.CLK_HZ  (CLK_HZ  )
+) i_uart_tx(
+.clk          (clk     ),
+.resetn       (resetb       ),
+.uart_txd     (ser_txd      ),
+.uart_tx_en   (ld_wdata     ),     // Send the data on uart_tx_data
+.uart_tx_busy (bufr_full    ),   // Module busy sending previous item.
+.uart_tx_data (mem_wdata[7:0])   // The data to be sent
+);
 
   assign ld_wdata  = io_wr_reg && port7_dec && mem_ble_reg[0] && mem_ready;
   assign rd_rdata  = io_rd_reg && port7_dec && mem_ble_reg[0] && mem_ready;
-  assign port7_dat = {6'h0, bufr_full, bufr_empty, rx_rdata};
+  assign port7_dat = {5'h0, bufr_ovr, bufr_full, bufr_empty, rx_rdata};
 
   endmodule

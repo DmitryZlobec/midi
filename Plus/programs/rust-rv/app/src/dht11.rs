@@ -12,7 +12,7 @@ pub fn temperature()-> u16 {
 
 
 pub fn himmidity()-> u16 {    
-       let addr = 0xFFFF0012;
+       let addr = 0xFFFF0012u32;
        unsafe {
            (addr as *mut u16).read_volatile()
        }

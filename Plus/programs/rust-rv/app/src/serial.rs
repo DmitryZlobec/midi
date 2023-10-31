@@ -13,7 +13,7 @@ impl Writer {
 					"sb t1, 14(t0)",
 					in(reg) byte	
                 ); }
-                for i in 0..1000 {
+                for i in 0..2000 {
                     unsafe { core::arch::asm!("nop"); }
                 }  	    }
 

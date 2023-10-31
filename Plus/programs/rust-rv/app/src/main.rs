@@ -23,6 +23,8 @@ const NOTE_ZERO:u8 =0x5F;
 fn main() -> ! {
    let mut k =0;  
    let mut temp; //= dht11::temperature();
+   println!();
+   println!("Music recognition started:");
 
    loop {
     unsafe { 
@@ -31,8 +33,8 @@ fn main() -> ! {
                        "lh {}, 16(t0)",
                        out(reg) temp	
     ); }
-    // print!("{:#02x} ",temp);
     if temp >0 {
+    println!(" Note:{}",temp);
     match temp {
             1 => serial::write(NOTE_B),
             2 => {serial::write(NOTE_A); serial::write(Bb)},
@@ -53,7 +55,7 @@ fn main() -> ! {
         //     unsafe { core::arch::asm!("nop"); }
         // }   
     }
-    for i in 0..500000 {
+    for i in 0..50000 {
         unsafe { core::arch::asm!("nop"); }
     }   
    }
