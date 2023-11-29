@@ -1,7 +1,5 @@
 use core::fmt;
 
-const note_B:u8 =0x42;
-
 pub struct Writer {}
 
 impl Writer {
@@ -64,14 +62,6 @@ pub fn write(byte: u8) {
     
 }
 
-pub fn say_B() {
-    unsafe { 
-        core::arch::asm!(
-        "lui     t0,0xffff0",
-        "li t1, 0x42",
-        "sb t1, 14(t0)"
-    ); }
-    
-}
+
 
 

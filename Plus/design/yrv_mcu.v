@@ -39,6 +39,7 @@
 `define IO_PORT7 15'h0007                                 /* lsword of port 7 address   */
 `define IO_PORT8 15'h0008                                 /* lsword of port 8 address   */
 `define IO_PORT9 15'h0009                                 /* lsword of port 9 address   */
+`define IO_PORT_MIDI 15'h000A                                /* lsword of port 9 address midi  */
 
 
 
@@ -57,7 +58,7 @@
 `include "boot_uart_receiver.sv"
 `endif
 
-module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd,
+module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd,midi_ser_txd,
                  wfi_state, clk, ei_req, nmi_req, port4_in, port5_in, resetb, ser_rxd
                 `ifdef BOOT_FROM_AUX_UART
                  , aux_uart_rx
@@ -104,6 +105,7 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
   output [31:0] extra_debug_data;                          /* extra debug data unconnected */
 `endif
   input         real_clk;
+  output        midi_ser_txd;
   /*****************************************************************************************/
   /* signal declarations                                                                   */
   /*****************************************************************************************/
@@ -111,6 +113,16 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
   wire          bufr_empty;                                /* serial tx buffer empty       */
   wire          bufr_full;                                 /* serial rx buffer full        */
   wire          bufr_ovr;                                  /* serial rx buffer overrun     */
+
+  wire          midi_bufr_done;                                 /* serial tx done sending       */
+  wire          midi_bufr_empty;                                /* serial tx buffer empty       */
+  wire          midi_bufr_full;                                 /* serial rx buffer full        */
+  wire          midi_bufr_ovr;                                  /* serial rx buffer overrun     */
+  wire          midi_ld_wdata;                                  /* serial port write            */
+  wire          midi_ser_txd;                                   /* transmit data output         */
+ 
+
+
   wire          bus_32;                                    /* 32-bit bus select            */
   wire          debug_mode;                                /* in debug mode                */
   wire          ld_wdata;                                  /* serial port write            */
@@ -124,6 +136,7 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
   wire          port4_dec, port5_dec;                    /* i/o port decodes             */
   wire          port6_dec, port7_dec;
   wire          port8_dec, port9_dec;
+  wire          portMIDI_dec;
   
   wire          rd_rdata;                                  /* serial port read             */
   wire          ser_clk;                                   /* serial clk output (cks mode) */
@@ -134,6 +147,7 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
   wire    [7:0] rx_rdata;                                  /* receive data buffer          */
   wire   [15:0] li_req;                                    /* local int requests           */
   wire   [15:0] port7_dat;                                 /* i/o port                     */
+  wire   [15:0] portMIDI_dat;                                 /* i/o port                     */
   wire   [31:0] mcu_rdata;                                 /* system memory read data      */
   wire   [31:0] mem_addr;                                  /* memory address               */
   wire   [31:0] mem_wdata;                                 /* memory write data            */
@@ -148,6 +162,7 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
   reg    [15:0] port4_reg,  port5_reg;
   reg    [15:0] port6_reg,  port7_reg;
   reg    [15:0] port8_reg,  port9_reg;
+  reg    [15:0] portMIDI_reg;
   reg    [15:0] mem_addr_reg;                              /* reg'd memory address         */
 
 // `ifdef INSTANCE_MEM
@@ -325,18 +340,20 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
   assign port7_dec = (mem_addr_reg[15:1] == `IO_PORT7);
   assign port8_dec = (mem_addr_reg[15:1] == `IO_PORT8);
   assign port9_dec = (mem_addr_reg[15:1] == `IO_PORT9);
+  assign portMIDI_dec = (mem_addr_reg[15:1] == `IO_PORT_MIDI);
 
   assign mcu_rdata  = (mem_rd_reg) ? mem_rdata :
-                      (port0_dec) ? port0_reg :
-                      (port1_dec) ? port1_reg :
-                      (port2_dec) ? port2_reg :
-                      (port3_dec) ? port3_reg :
-                      (port4_dec) ? port4_reg :
-                      (port5_dec) ? port5_reg :
-                      (port6_dec) ? port6_reg :
-                      (port7_dec) ? port7_dat :
-                      (port8_dec) ? port8_reg :
-                      (port9_dec) ? port9_reg :32'h0;
+                      (port0_dec)  ? port0_reg :
+                      (port1_dec)  ? port1_reg :
+                      (port2_dec)  ? port2_reg :
+                      (port3_dec)  ? port3_reg :
+                      (port4_dec)  ? port4_reg :
+                      (port5_dec)  ? port5_reg :
+                      (port6_dec)  ? port6_reg :
+                      (port7_dec)  ? port7_dat :
+                      (port8_dec)  ? port8_reg :
+                      (port9_dec)  ? port9_reg :
+                      (portMIDI_dec) ? portMIDI_reg : 32'h0;
 
 
   /*****************************************************************************************/
@@ -354,6 +371,7 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
       port7_reg <= 16'h0;
       port8_reg <= 16'h0;
       port9_reg <= 16'h0;
+      portMIDI_reg <= 16'h0;
       end
     else begin
       if (io_wr_reg && port0_dec && mem_ready) begin
@@ -385,6 +403,10 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
       if (io_wr_reg && port7_dec && mem_ready) begin
         if (mem_ble_reg[0]) port7_reg[7:0] <= mem_wdata[7:0];
         end
+   
+      if (io_wr_reg && portMIDI_dec && mem_ready) begin
+        if (mem_ble_reg[0]) portMIDI_reg[7:0] <= mem_wdata[7:0];
+        end
       end
     end
 
@@ -400,7 +422,7 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
 //parameter CLK_HZ = 50000000;
 parameter CLK_HZ = 12500000;
 
-parameter BIT_RATE =   31250;
+parameter BIT_RATE =   9600;
 parameter PAYLOAD_BITS = 8;
 
 
@@ -439,5 +461,31 @@ uart_tx #(
   assign ld_wdata  = io_wr_reg && port7_dec && mem_ble_reg[0] && mem_ready;
   assign rd_rdata  = io_rd_reg && port7_dec && mem_ble_reg[0] && mem_ready;
   assign port7_dat = {5'h0, bufr_ovr, bufr_full, bufr_empty, rx_rdata};
+
+
+
+// Clock frequency in hertz.
+//parameter CLK_HZ = 50000000;
+
+parameter MIDI_BIT_RATE = 31250;
+
+//
+// MIDI UART Transmitter module.
+//
+uart_tx #(
+.BIT_RATE(MIDI_BIT_RATE),
+.PAYLOAD_BITS(PAYLOAD_BITS),
+.CLK_HZ  (CLK_HZ  )
+) midi_uart_tx(
+.clk          (clk     ),
+.resetn       (resetb       ),
+.uart_txd     (midi_ser_txd      ),
+.uart_tx_en   (midi_ld_wdata     ),     // Send the data on uart_tx_data
+.uart_tx_busy (midi_bufr_full    ),   // Module busy sending previous item.
+.uart_tx_data (mem_wdata[7:0])   // The data to be sent
+);
+
+assign midi_ld_wdata  = io_wr_reg && portMIDI_dec && mem_ble_reg[0] && mem_ready;
+assign portMIDI_dat = {7'h0, midi_bufr_full, 8'b0};
 
   endmodule

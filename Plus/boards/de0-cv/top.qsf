@@ -128,14 +128,16 @@ set_location_assignment PIN_V10  -to buzzer
 set_location_assignment PIN_J17 -to rx
 set_location_assignment PIN_K16 -to tx
 
+set_location_assignment PIN_T18  -to midi_ser_txd
+
+
 set_location_assignment PIN_N16 -to sd
 set_location_assignment PIN_B16 -to sck
 set_location_assignment PIN_C16 -to ws
 set_location_assignment PIN_K20 -to lr
 
-set_location_assignment PIN_T15  -to lpt_STROBE
 set_location_assignment PIN_T17  -to lpt_data[0]
-set_location_assignment PIN_T18  -to lpt_data[1]
+#set_location_assignment PIN_T18  -to lpt_data[1]
 set_location_assignment PIN_T19  -to lpt_data[2]
 set_location_assignment PIN_T20  -to lpt_data[3]
 set_location_assignment PIN_R16  -to lpt_data[4]

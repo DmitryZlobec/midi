@@ -10,6 +10,8 @@ module top
   input  [ 3:0] key,
   input  [ 9:0] sw,
 
+  output       midi_ser_txd,
+
   output [ 9:0] led,
 
   output [ 7:0] hex0,
@@ -32,6 +34,7 @@ module top
   input         lpt_POUT,
   input         lpt_SEL,
   output        lpt_reset,
+  
   output        tx,
   output              lr,
   output              ws,
@@ -89,7 +92,7 @@ module top
   //--------------------------------------------------------------------------
   // MCU clock
 
-  wire slow_clk_mode = ~ key[1];
+  wire slow_clk_mode = sw[8];
 
   logic [25:0] clk_cnt;
     //Timer 3Hz
@@ -146,6 +149,7 @@ always_ff @ (posedge time_clk or posedge reset)
   wire  [15:0] port8_in;
   wire  [15:0] port9_in;
 
+
   //--------------------------------------------------------------------------
   // MCU outputs
 
@@ -198,7 +202,7 @@ always_ff @ (posedge time_clk or posedge reset)
   //--------------------------------------------------------------------------
   // MCU instantiation
 
-  yrv_mcu i_yrv_mcu (.clk (muxed_clk), .nmi_req(nmi),.real_clk(clk_cnt[1]), .*);
+  yrv_mcu i_yrv_mcu (.clk (muxed_clk), .nmi_req(nmi),.real_clk(clk_cnt[1]), .midi_ser_txd(midi_ser_txd), .*);
 
   //--------------------------------------------------------------------------
   // Pin assignments
@@ -223,6 +227,20 @@ always_ff @ (posedge time_clk or posedge reset)
   //--------------------------------------------------------------------------
 
   logic [23:0] display_number;
+
+
+always_comb
+  case (key[3:1])
+  3'b111 : port8_in = 16'd0; // NONE
+  3'b110 : port8_in = 16'd1; //С
+  3'b101 : port8_in = 16'd2; //D
+  3'b100 : port8_in = 16'd3; //E
+  3'b011 : port8_in = 16'd4; //F
+  3'b010 : port8_in = 16'd5; //G
+  3'b001 : port8_in = 16'd6;  //A
+  3'b000 : port8_in = 16'd7;  //H
+  endcase
+
 
   always_comb
     casez (sw)
@@ -267,7 +285,7 @@ always_ff @ (posedge time_clk or posedge reset)
   // 50,000,000 Hz / 125 Hz = 40,000 cycles
   
   // assign nmi = clk_cnt[25];
-    assign nmi = key[3];
+    // assign nmi = key[3];
 
   
     wire display_on;
@@ -396,24 +414,24 @@ ps2scan ps2scan(.clk(clk), .rst_n(~ reset), .ps2k_clk(ps2k_clk), .ps2k_data(ps2k
 
 wire [                 23:0] mic;
 
-inmp441_mic_i2s_receiver i_microphone
-  (
-        .clk   ( clk        ),
-        .rst   ( reset      ),
-        .lr    ( lr         ), 
-        .ws    ( ws         ), 
-        .sck   ( sck        ), 
-        .sd    ( sd         ),
-        .value ( mic        )
-  );
+// inmp441_mic_i2s_receiver i_microphone
+//   (
+//         .clk   ( clk        ),
+//         .rst   ( reset      ),
+//         .lr    ( lr         ), 
+//         .ws    ( ws         ), 
+//         .sck   ( sck        ), 
+//         .sd    ( sd         ),
+//         .value ( mic        )
+//   );
 
-  note  i_note
-  (
-        .clk   ( clk        ),
-        .rst   ( reset      ),
-        .mic(mic),
-        .o_note(port8_in)
-  );
+//   note  i_note
+//   (
+//         .clk   ( clk        ),
+//         .rst   ( reset      ),
+//         .mic(mic),
+//         .o_note(port8_in)
+//   );
 
   
 
