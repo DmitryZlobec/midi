@@ -35,9 +35,7 @@ To use serial port switch on S1 jumper
 
 Original serial port 
 
-https://github.com/fpga-logi/logi-pong-chu-examples/tree/master/pong-chu-logi-edu-examples-verilog
-
-https://onlinelibrary.wiley.com/doi/epdf/10.1002/9780470374283.ch8
+https://github.com/DmitryZlobec/uart
 
 
 ## Related books:
@@ -76,11 +74,14 @@ __cargo objcopy --release -- -O binary app.bin__
 
 __cargo build -Z build-std=core --target riscv32ic-unknown-none-elf.json --release__
 
-__python bin2hex/freedom-bin2hex.py -w16 app.bin >code.mem16__
+
+Main build steps
 
 __rustc -Z unstable-options --target=riscv32imac-unknown-none-elf --print target-spec-json__
 
 __riscv-none-elf-objcopy.exe  -O binary ../target/riscv32ic-unknown-none-elf/release/app  app.bin__
+
+__python bin2hex/freedom-bin2hex.py -w16 app.bin >code.mem16__
 
 To load in FPGA
 
