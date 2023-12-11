@@ -87,6 +87,16 @@ To load in FPGA
 
 __load.bat__
 
+Another build
+
+__cargo build -Z build-std=core --target riscv32i-unknown-none-elf --release__
+
+__riscv-none-elf-objcopy.exe  -O binary ../target/riscv32ic-unknown-none-elf/release/app  app.bin__
+
+__python bin2hex/freedom-bin2hex.py -w16 app.bin >code.mem16__
+
+
+
 ## Example
 https://youtube.com/shorts/3Girmdu2oNI
 
