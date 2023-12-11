@@ -1,9 +1,18 @@
 
-struct MidiMessage {
-    lenth: i32,
-    buff:[u32;1], 
+pub struct Message {
+    pub size: usize,
+    pub command: [u8;3],
 }
 
+impl Message {
+    pub fn new(command:[u8;3], size:u8) -> Message {
+        Message {command, size: size.into()}
+    }
+}
+
+pub struct StatusMessage {
+    pub msg:[u8;2],
+}
 
 pub fn write(byte: u8) {
     unsafe { 
@@ -13,7 +22,13 @@ pub fn write(byte: u8) {
         "sb t1, 20(t0)",
         in(reg) byte	
     ); }
-    for _ in 0..2000 {
+    for _ in 0..700 {
         unsafe { core::arch::asm!("nop"); }
     } 
+}
+
+pub fn send_message(message:&Message) {
+    for n in 0..message.size {
+        write(message.command[n]);
+    }
 }

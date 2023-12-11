@@ -467,7 +467,7 @@ uart_tx #(
 // Clock frequency in hertz.
 //parameter CLK_HZ = 50000000;
 
-parameter MIDI_BIT_RATE = 31250;
+parameter MIDI_BIT_RATE = 19200;
 
 //
 // MIDI UART Transmitter module.
