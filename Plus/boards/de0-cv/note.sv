@@ -182,7 +182,7 @@ module note
         else
             d_note <= note;
 
-    logic  [19:0] t_cnt;           // Threshold counter
+    logic  [18:0] t_cnt;           // Threshold counter
     logic  [w_note - 1:0] t_note;  // Thresholded note
 
     always_ff @ (posedge clk or posedge rst)

@@ -7,13 +7,14 @@ impl Writer {
                 unsafe { 
                     core::arch::asm!(
 					"lui     t0,0xffff0",
-					"mv t1, {0}",
-					"sb t1, 14(t0)",
+					// "mv t1, {0}",
+					"sb {0}, 14(t0)",
 					in(reg) byte	
                 ); }
-                for i in 0..2000 {
+                for _ in 0..2000 {
                     unsafe { core::arch::asm!("nop"); }
-                }  	    }
+                }  	   
+             }
 
     fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {

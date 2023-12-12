@@ -229,17 +229,17 @@ always_ff @ (posedge time_clk or posedge reset)
   logic [23:0] display_number;
 
 
-always_comb
-  case (key[3:1])
-  3'b111 : port8_in = 16'd0; // NONE
-  3'b110 : port8_in = 16'd1; //С
-  3'b101 : port8_in = 16'd2; //D
-  3'b100 : port8_in = 16'd3; //E
-  3'b011 : port8_in = 16'd4; //F
-  3'b010 : port8_in = 16'd5; //G
-  3'b001 : port8_in = 16'd6;  //A
-  3'b000 : port8_in = 16'd7;  //H
-  endcase
+// always_comb
+//   case (key[3:1])
+//   3'b111 : port8_in = 16'd0; // NONE
+//   3'b110 : port8_in = 16'd1; //С
+//   3'b101 : port8_in = 16'd2; //D
+//   3'b100 : port8_in = 16'd3; //E
+//   3'b011 : port8_in = 16'd4; //F
+//   3'b010 : port8_in = 16'd5; //G
+//   3'b001 : port8_in = 16'd6;  //A
+//   3'b000 : port8_in = 16'd7;  //H
+//   endcase
 
 
   always_comb
@@ -414,24 +414,24 @@ ps2scan ps2scan(.clk(clk), .rst_n(~ reset), .ps2k_clk(ps2k_clk), .ps2k_data(ps2k
 
 wire [                 23:0] mic;
 
-// inmp441_mic_i2s_receiver i_microphone
-//   (
-//         .clk   ( clk        ),
-//         .rst   ( reset      ),
-//         .lr    ( lr         ), 
-//         .ws    ( ws         ), 
-//         .sck   ( sck        ), 
-//         .sd    ( sd         ),
-//         .value ( mic        )
-//   );
+inmp441_mic_i2s_receiver i_microphone
+  (
+        .clk   ( clk        ),
+        .rst   ( reset      ),
+        .lr    ( lr         ), 
+        .ws    ( ws         ), 
+        .sck   ( sck        ), 
+        .sd    ( sd         ),
+        .value ( mic        )
+  );
 
-//   note  i_note
-//   (
-//         .clk   ( clk        ),
-//         .rst   ( reset      ),
-//         .mic(mic),
-//         .o_note(port8_in)
-//   );
+  note  i_note
+  (
+        .clk   ( clk        ),
+        .rst   ( reset      ),
+        .mic(mic),
+        .o_note(port8_in)
+  );
 
   
 

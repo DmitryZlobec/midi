@@ -25,6 +25,7 @@ set_false_path -from * -to [get_ports {vga_g[*]}]
 set_false_path -from * -to [get_ports {vga_b[*]}]
 
 set_false_path -from * -to tx
+set_false_path -from * -to midi_ser_txd
 set_false_path -from * -to dh
 
 set_false_path -from * -to lpt_STROBE

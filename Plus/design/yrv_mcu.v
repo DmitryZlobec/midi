@@ -353,7 +353,7 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
                       (port7_dec)  ? port7_dat :
                       (port8_dec)  ? port8_reg :
                       (port9_dec)  ? port9_reg :
-                      (portMIDI_dec) ? portMIDI_reg : 32'h0;
+                      (portMIDI_dec) ? portMIDI_dat : 32'h0;
 
 
   /*****************************************************************************************/

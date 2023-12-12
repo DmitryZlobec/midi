@@ -53,29 +53,30 @@ fn main() -> ! {
     println!(" Key:{}",note);
     if note !=k  {
         println!(" Note On:{}",note);
-        match note {
-            1 => midi::send_message(&note_A_on),
-            2 => midi::send_message(&note_B_on),
-            3 => midi::send_message(&note_C_on),
-            4 => midi::send_message(&note_D_on),
-            5 => midi::send_message(&note_E_on),
-            6 => midi::send_message(&note_F_on),
-            7 => midi::send_message(&note_G_on),
-            _ =>  sleep(1),
-        };
+
         if k>0 {
             println!(" Note Off:{}",k);
             match k {
-                1 => midi::send_message(&note_A_off),
-                2 => midi::send_message(&note_B_off),
-                3 => midi::send_message(&note_C_off),
-                4 => midi::send_message(&note_D_off),
-                5 => midi::send_message(&note_E_off),
-                6 => midi::send_message(&note_F_off),
-                7 => midi::send_message(&note_G_off),
+                4 => midi::send_message(&note_A_off),
+                1 => midi::send_message(&note_B_off),
+                2048 => midi::send_message(&note_C_off),
+                512 => midi::send_message(&note_D_off),
+                128 => midi::send_message(&note_E_off),
+                64 => midi::send_message(&note_F_off),
+                16 => midi::send_message(&note_G_off),
                 _ =>  sleep(1),
             };       
         }
+        match note {
+            4 => midi::send_message(&note_A_on),
+            1 => midi::send_message(&note_B_on),
+            2048 => midi::send_message(&note_C_on),
+            512 => midi::send_message(&note_D_on),
+            128 => midi::send_message(&note_E_on),
+            64 => midi::send_message(&note_F_on),
+            16 => midi::send_message(&note_G_on),
+            _ =>  sleep(1),
+        };
     }
         k = note;
         sleep(250000);
@@ -83,13 +84,13 @@ fn main() -> ! {
         if k>0  {
             println!(" Note Off:{}",k);
             match k {
-                1 => midi::send_message(&note_A_off),
-                2 => midi::send_message(&note_B_off),
-                3 => midi::send_message(&note_C_off),
-                4 => midi::send_message(&note_D_off),
-                5 => midi::send_message(&note_E_off),
-                6 => midi::send_message(&note_F_off),
-                7 => midi::send_message(&note_G_off),
+                4 => midi::send_message(&note_A_off),
+                1 => midi::send_message(&note_B_off),
+                2048 => midi::send_message(&note_C_off),
+                512 => midi::send_message(&note_D_off),
+                128 => midi::send_message(&note_E_off),
+                64 => midi::send_message(&note_F_off),
+                16 => midi::send_message(&note_G_off),
                 _ =>  sleep(1),
             };    
         }

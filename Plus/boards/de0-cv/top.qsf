@@ -131,10 +131,10 @@ set_location_assignment PIN_K16 -to tx
 set_location_assignment PIN_T18  -to midi_ser_txd
 
 
-set_location_assignment PIN_N16 -to sd
-set_location_assignment PIN_B16 -to sck
-set_location_assignment PIN_C16 -to ws
-set_location_assignment PIN_K20 -to lr
+set_location_assignment PIN_N16 -to lr
+set_location_assignment PIN_M16 -to ws
+set_location_assignment PIN_D17 -to sck
+set_location_assignment PIN_K20 -to sd
 
 set_location_assignment PIN_T17  -to lpt_data[0]
 #set_location_assignment PIN_T18  -to lpt_data[1]
