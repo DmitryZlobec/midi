@@ -133,6 +133,7 @@ Octave 	Note Numbers
 
 cargo build -Z build-std=core --target riscv32ia-unknown-none-elf.json --release
 
+
 riscv-none-elf-objcopy.exe -O binary ../target/riscv32ia-unknown-none-elf/release/app app.bin
 
 
