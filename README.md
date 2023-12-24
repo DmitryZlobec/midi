@@ -128,3 +128,7 @@ Octave 	Note Numbers
 8	108	109	110	111	112	113	114	115	116	117	118	119
 
 9	120	121	122	123	124	125	126	127
+
+
+
+cargo build -Z build-std=core --target riscv32ia-unknown-none-elf.json --release
