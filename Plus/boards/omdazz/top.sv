@@ -10,11 +10,12 @@ module top
 
   input        [3:0] key_sw,
   output       [3:0] led,
+  output       midi_ser_txd,
 
   output logic [7:0] abcdefgh,
   output logic [3:0] digit,
 
-  output             buzzer,
+  input             buzzer,
 
   output             hsync,
   output             vsync,
@@ -38,7 +39,7 @@ module top
   //--------------------------------------------------------------------------
   // Unused pins
 
-  assign buzzer = 1'b1;
+  // assign buzzer = 1'b1;
 
 
   //--------------------------------------------------------------------------
@@ -49,7 +50,7 @@ module top
   //--------------------------------------------------------------------------
   // MCU clock
 
-  logic [22:0] clk_cnt;
+  logic [25:0] clk_cnt;
   reg  [15:0] random;
   wire [15:0] w_random;  
   reg sec_clock;
@@ -113,6 +114,9 @@ module top
   wire         ser_rxd;     // receive data input
   wire  [15:0] port4_in  = '0;
   wire  [15:0] port5_in  = '0;
+  wire  [15:0] port8_in;
+  wire  [15:0] port9_in  = {15'b0, buzzer};
+
 
   //--------------------------------------------------------------------------
   // MCU outputs
@@ -155,7 +159,9 @@ module top
   //--------------------------------------------------------------------------
   // MCU instantiation
 
-  yrv_mcu i_yrv_mcu (.clk (muxed_clk), .port4_in(key_code),.port5_in(random),.real_clk(clk),.*);
+  // yrv_mcu i_yrv_mcu (.clk (muxed_clk), .port4_in(key_code),.port5_in(random),.real_clk(clk),.*);
+  yrv_mcu i_yrv_mcu (.clk (muxed_clk), .nmi_req(nmi),.real_clk(clk_cnt[1]), .midi_ser_txd(midi_ser_txd), .*);
+
 
   //--------------------------------------------------------------------------
   // Pin assignments
@@ -293,16 +299,16 @@ module top
   wire [7:0] r_next;                      // baud rate generator next state logic
   wire tick;                              // baud tick for uart_rx & uart_tx
 
-  reg [7:0] key_code;
-  always_ff @ (posedge clk or negedge resetb)
-    if (~ resetb)
-        begin  
-          key_code<='0;
-        end
-    else
-      begin
-          key_code<=ascii_code;
-      end
-ps2scan ps2scan(.clk(clk), .rst_n(reset_n), .ps2k_clk(ps2k_clk), .ps2k_data(ps2k_data), .ps2_byte(ascii_code), .ps2_state(scan_code_ready)); 
+  // reg [7:0] key_code;
+  // always_ff @ (posedge clk or negedge resetb)
+  //   if (~ resetb)
+  //       begin  
+  //         key_code<='0;
+  //       end
+  //   else
+  //     begin
+  //         key_code<=ascii_code;
+  //     end
+// ps2scan ps2scan(.clk(clk), .rst_n(reset_n), .ps2k_clk(ps2k_clk), .ps2k_data(ps2k_data), .ps2_byte(ascii_code), .ps2_state(scan_code_ready)); 
 
 endmodule

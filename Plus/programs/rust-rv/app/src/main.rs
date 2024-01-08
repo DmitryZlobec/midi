@@ -3,6 +3,10 @@
 
 extern crate panic_halt;
 extern crate riscv_rt;
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 mod serial;
 mod timer;
 mod adc;
@@ -21,8 +25,29 @@ const Bb:u8 =0x73;
 const NOTE_ZERO:u8 =0x5F;
 
 
+use linked_list_allocator::LockedHeap;
+
+#[global_allocator]
+static ALLOCATOR: LockedHeap = LockedHeap::empty();
+
+extern "C" {
+    static _sheap: u8;
+    static _heap_size: u8;
+}
+
+pub fn init_heap() {
+    unsafe {
+         let heap_start = &_sheap  as *const u8 as *mut u8;
+         let heap_size = &_heap_size as *const u8 as usize;
+        ALLOCATOR.lock().init(heap_start, heap_size);
+    }
+}
+
 #[entry]
 fn main() -> ! {
+init_heap();
+let mut xs: Vec<u32> = Vec::new();
+
    let mut k =0;  
    println!();
    println!("Midi sender started:");
@@ -53,7 +78,6 @@ fn main() -> ! {
     println!(" Key:{}",note);
     if note !=k  {
         println!(" Note On:{}",note);
-
         if k>0 {
             println!(" Note Off:{}",k);
             match k {

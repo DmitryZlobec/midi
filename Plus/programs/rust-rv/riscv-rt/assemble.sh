@@ -27,7 +27,8 @@ do
     esac
 
     riscv-none-elf-gcc -ggdb3 -fdebug-prefix-map=$(pwd)=/riscv-rt -c -mabi=ilp32${abi} -march=rv32${ext} asm/yrv.s -o bin/yrv.o
-    riscv-none-elf-ar crs bin/riscv32i-unknown-none-elf.a bin/yrv.o 
+    riscv-none-elf-ar crs bin/riscv32ia-unknown-none-elf.a bin/yrv.o 
+    cp bin/riscv32ia-unknown-none-elf.a bin/riscv32i-unknown-none-elf.a
 
     
 done

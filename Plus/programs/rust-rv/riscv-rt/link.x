@@ -16,6 +16,7 @@ _RST_BASE = 0x200;
  PROVIDE(__stack_top = ORIGIN(BRAM) + LENGTH(BRAM));
  PROVIDE(__pre_init = default_pre_init);
  PROVIDE(_mp_hook = default_mp_hook);
+ PROVIDE(_heap_size = 2k);
 
  .text :
  {
@@ -59,7 +60,14 @@ _RST_BASE = 0x200;
  }> BRAM
 
 
- 
+  .heap (NOLOAD) :
+  {
+    _sheap = .;
+    . += _heap_size;
+    . = ALIGN(4);
+    _eheap = .;
+  } > BRAM
+
   /DISCARD/ :
   {
     *(.note.gnu.build-id)

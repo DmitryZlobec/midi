@@ -1,6 +1,13 @@
 use core::fmt;
+use lazy_static::lazy_static;
+use spin::Mutex;
+use volatile::Volatile;
 
 pub struct Writer {}
+
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {});
+}
 
 impl Writer {
     pub fn write_byte(&mut self, byte: u8) {
@@ -47,8 +54,9 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    let mut writer = Writer {};
-    writer.write_fmt(args).unwrap();
+    // let mut writer = Writer {};
+    WRITER.lock().write_fmt(args).unwrap();
+    // writer.write_fmt(args).unwrap();
 }
 
 

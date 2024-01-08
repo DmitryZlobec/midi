@@ -72,6 +72,8 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
   /* signal declarations                                                                   */
   /*****************************************************************************************/
   wire          amo_4_dec;                                 /* amo inst decode              */
+  wire          amo_4_dec_sc;                              /* amo inst decode sc           */
+  wire          amo_4_dec_lr;                              /* amo inst decode sc           */
   wire          aop_4_add,   aop_4_and,    aop_4_or;       /* alu operation selects        */
   wire          aop_4_pack,  aop_4_rol,    aop_4_ror;
   wire          aop_4_shfl,  aop_4_sl,     aop_4_sr;
@@ -101,6 +103,7 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
   wire          fn7_4_30,    fn7_4_34;
   wire          fn7_4_00x,   fn7_4_04x,    fn7_4_10x;      /* fn7 amo decodes              */
   wire          fn7_4_20x,   fn7_4_30x;
+  wire          fn7_4_lr,   fn7_4_sc;
   wire          fnc_4_dec;                                 /* fence instruction            */
   wire          flush_5_exc;                               /* invalidate stage 6           */
   wire          imm6_nz,     imm8_nz;                      /* rv32c non-zero imm field     */
@@ -185,6 +188,7 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
 
   reg           a_add_5_reg, a_ain_5_reg, a_and_5_reg;     /* alu function selects         */
   reg           a_bin_5_reg, a_ext_5_reg, a_or_5_reg;
+  reg           a_zero_5_reg;
   reg           a_tst_5_reg, a_xor_5_reg;
   reg           alta_5_reg,  altb_5_reg;                   /* alu alt in select            */
   reg           amo_5_reg,   amo_6_reg;                    /* amoxxx instruction           */
@@ -293,7 +297,8 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
 `ifdef INSTANCE_REG
   wire   [31:0] src1_4_rdata, src2_4_rdata;                /* raw read data                */
 `else
-  reg    [31:0] regf_mem [0:31];                           /* reg file ram                 */
+  reg    [31:0] regf_mem [0:31]  /* synthesis ramstyle = logic */;                       
+   /* reg file ram                 */
   reg    [31:0] src1_4_rdata, src2_4_rdata;                /* raw read data                */
 `endif
 
@@ -444,6 +449,7 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
       6'b100100: ls_amo_out = ls_data_reg ^ mem_rdat;
       6'b101000: ls_amo_out = ls_data_reg | mem_rdat;
       6'b101100: ls_amo_out = ls_data_reg & mem_rdat;
+      6'b100010: ls_amo_out = mem_rdat;
       default:   ls_amo_out = ls_data_reg;
       endcase
     end
@@ -856,6 +862,9 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
   assign fn7_4_10x  =  (imm_4_reg[11:7] == 5'b00100);
   assign fn7_4_20x  =  (imm_4_reg[11:7] == 5'b01000);
   assign fn7_4_30x  =  (imm_4_reg[11:7] == 5'b01100);
+  assign fn7_4_lr  =  (imm_4_reg[11:7] == 5'b00010);
+  assign fn7_4_sc  =  (imm_4_reg[11:7] == 5'b00011);
+
 
   /*****************************************************************************************/
   /* opcode special cases                                                                  */
@@ -962,7 +971,14 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
                        (opc_4_amo  && fn3_4_2 && fn7_4_04x) ||                /* amoswap.w */
                        (opc_4_amo  && fn3_4_2 && fn7_4_10x) ||                /* amoxor.w  */
                        (opc_4_amo  && fn3_4_2 && fn7_4_20x) ||                /* amoor.w   */
-                       (opc_4_amo  && fn3_4_2 && fn7_4_30x);                  /* amoand.w  */
+                       (opc_4_amo  && fn3_4_2 && fn7_4_30x) ||                /* amoand.w  */
+                       (opc_4_amo  && fn3_4_2 && fn7_4_lr)  ||
+                       (opc_4_amo  && fn3_4_2 && fn7_4_sc);
+
+  assign amo_4_dec_lr = (opc_4_amo  && fn3_4_2 && fn7_4_lr);
+  
+  assign amo_4_dec_sc = (opc_4_amo  && fn3_4_2 && fn7_4_sc);                  
+  
   assign br_4_dec    = (opc_4_br   && fn3_4_0) ||                             /* beq       */
                        (opc_4_br   && fn3_4_1) ||                             /* bne       */
                        (opc_4_br   && fn3_4_4) ||                             /* blt       */
@@ -1009,7 +1025,7 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
   assign wreg_4_out  = aop_4_add   || aop_4_or  || aop_4_and  || aop_4_xor  || aop_4_sl   ||
                        aop_4_sr    || aop_4_rol || aop_4_ror  || aop_4_shfl || aop_4_pack ||
                        sbext_4_dec || slt_4_dec || sltu_4_dec || opc_4_lui  || amo_4_dec  ||
-                       (csr_4_dec && csr_4_ok);
+                      amo_4_dec_lr || (csr_4_dec && csr_4_ok);
 
   /*****************************************************************************************/
   /* csr check                                                                             */
@@ -1043,6 +1059,7 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
       a_ain_5_reg <=  1'b0;                                /* alu: pass ain                */
       a_and_5_reg <=  1'b0;                                /* alu: and                     */
       a_bin_5_reg <=  1'b0;                                /* alu: pass bin                */
+      a_zero_5_reg <= 1'b0;
       a_ext_5_reg <=  1'b0;                                /* alu: external                */
       a_or_5_reg  <=  1'b0;                                /* alu: or                      */
       a_tst_5_reg <=  1'b0;                                /* alu: test                    */
@@ -1093,6 +1110,7 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
       a_add_5_reg <=  aop_4_add || br_4_dec || st_4_dec;
       a_ain_5_reg <=  amo_4_dec;
       a_and_5_reg <=  aop_4_and;
+      a_zero_5_reg <= amo_4_dec_sc;
       a_bin_5_reg <=  opc_4_lui || csr_4_dec;
       a_ext_5_reg <=  aop_4_rol || aop_4_ror || aop_4_sl || aop_4_sr ||
                       aop_4_shfl || aop_4_pack;
@@ -1345,17 +1363,18 @@ module yrv_cpu (csr_achk, csr_addr, csr_read, csr_wdata, csr_write, dbg_type, de
 
   always @ (a_add_5_reg or a_ain_5_reg or a_bin_5_reg or a_and_5_reg or a_ext_5_reg or
             a_or_5_reg or a_tst_5_reg or a_xor_5_reg or alu_5_add or alu_5_ain or
-            alu_5_bin or alu_5_ext or alu_5_tst or invb_5_reg) begin
+            alu_5_bin or alu_5_ext or alu_5_tst or invb_5_reg or a_zero_5_reg) begin
     casex ({a_ext_5_reg, a_tst_5_reg, a_xor_5_reg, a_and_5_reg,
-            a_or_5_reg,  a_add_5_reg, a_bin_5_reg, a_ain_5_reg}) //synthesis parallel_case
-      8'bxxxxxxx1: alu_5_out = alu_5_ain;                                     /* pass a    */
-      8'bxxxxxx1x: alu_5_out = alu_5_bin;                                     /* pass b    */
-      8'bxxxxx1xx: alu_5_out = alu_5_add;                                     /* add/sub   */
-      8'bxxxx1xxx: alu_5_out = alu_5_ain | alu_5_bin;                         /* or        */
-      8'bxxx1xxxx: alu_5_out = alu_5_ain & alu_5_bin;                         /* and       */
-      8'bxx1xxxxx: alu_5_out = alu_5_ain ^ alu_5_bin;                         /* xor       */
-      8'bx1xxxxxx: alu_5_out = {31'h0,     alu_5_tst};                        /* test      */
-      8'b1xxxxxxx: alu_5_out = alu_5_ext;                                     /* external  */
+            a_or_5_reg,  a_add_5_reg, a_bin_5_reg, a_ain_5_reg, a_zero_5_reg}) //synthesis parallel_case
+      9'bxxxxxxxx1: alu_5_out = 32'h0;                                         /* zero for sc */
+      9'bxxxxxxx1x: alu_5_out = alu_5_ain;                                     /* pass a    */
+      9'bxxxxxx1xx: alu_5_out = alu_5_bin;                                     /* pass b    */
+      9'bxxxxx1xxx: alu_5_out = alu_5_add;                                     /* add/sub   */
+      9'bxxxx1xxxx: alu_5_out = alu_5_ain | alu_5_bin;                         /* or        */
+      9'bxxx1xxxxx: alu_5_out = alu_5_ain & alu_5_bin;                         /* and       */
+      9'bxx1xxxxxx: alu_5_out = alu_5_ain ^ alu_5_bin;                         /* xor       */
+      9'bx1xxxxxxx: alu_5_out = {31'h0,     alu_5_tst};                        /* test      */
+      9'b1xxxxxxxx: alu_5_out = alu_5_ext;                                     /* external  */
       default:     alu_5_out = 32'h0;
       endcase
     end

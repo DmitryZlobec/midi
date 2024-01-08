@@ -91,6 +91,8 @@ set_location_assignment PIN_31 -to sram_io[4]
 set_location_assignment PIN_28 -to sram_io[3]
 
 set_location_assignment PIN_110 -to buzzer
+set_location_assignment PIN_11 -to midi_ser_txd
+
 
 set_location_assignment PIN_101 -to hsync
 set_location_assignment PIN_103 -to vsync

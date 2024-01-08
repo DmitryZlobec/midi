@@ -169,7 +169,7 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
 //   wire   [31:0] mem_rdata;                                 /* raw read data                */
 // `else
   wire    [3:0] mem_wr_byte;                               /* system ram byte enables      */
-	// reg     [7:0] mcu_mem [0:1024*16];                          /* system ram                   */
+	// reg     [7:0] mcu_mem [0:1024*32];                          /* system ram                   */
   reg     [7:0] mcu_mem0 [0:1024*32];                          /* system ram                   */
 	reg     [7:0] mcu_mem1 [0:1024*32];                          /* system ram                   */
   reg    [31:0] mem_rdata;                                 /* raw read data                */
@@ -307,6 +307,16 @@ module yrv_mcu  (debug_mode, port0_reg, port1_reg, port2_reg, port3_reg, ser_txd
     if (mem_wr_byte[1]) mcu_mem0[mem_addr_reg[15:1]] <= mem_wdata[15:8];
     if (mem_wr_byte[0]) mcu_mem1[mem_addr_reg[15:1]] <= mem_wdata[7:0];
     end
+
+    // For OMDAZZ 
+    // always @ (posedge clk) begin
+    // if (mem_trans[0]) begin
+    //   mem_rdata[15:8]  <= mcu_mem[{mem_addr[14:1], 1'b1}];
+    //   mem_rdata[7:0]   <= mcu_mem[{mem_addr[14:1], 1'b0}];
+    //   end
+    // if (mem_wr_byte[1]) mcu_mem[{mem_addr_reg[14:1], 1'b1}] <= mem_wdata[15:8];
+    // if (mem_wr_byte[0]) mcu_mem[{mem_addr_reg[14:1], 1'b0}] <= mem_wdata[7:0];
+    // end  
 
   /*****************************************************************************************/
   /* bus interface                                                                         */
